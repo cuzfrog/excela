@@ -9,6 +9,7 @@ trait Row {
   def getCell(columnIdx: Int): Cell
   def cellsCnt: Int = cells.size
   def maxColumnIdx: Int
+  def isEmpty: Boolean
 }
 
 object Row {
@@ -24,11 +25,16 @@ object Row {
       case None       => Cell(index, columnIdx, sheet)
       case Some(cell) => cell
     }
+    def isEmpty = cells.map(_.getValue).exists {
+      case Some(v) if (v != "") => true
+      case _                 => false
+    }.unary_!
   }
 
   private class PlaceHolderRow(val index: Int, val sheet: Sheet) extends Row {
-    val cells = Seq()
-    val maxColumnIdx = (-1)
+    final val cells = Seq()
+    final val maxColumnIdx = (-1)
     def getCell(columnIdx: Int) = Cell(index, columnIdx, sheet) //return a place holder
+    final val isEmpty = true
   }
 }

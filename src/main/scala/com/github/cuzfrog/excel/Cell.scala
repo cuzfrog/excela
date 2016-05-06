@@ -29,7 +29,7 @@ object Cell {
 
     import org.apache.poi.ss.usermodel.Cell._
     override def getValue = Option(fromCell(cell, cell.getCellType))
-    override lazy val getStyle = Option(Style(entity.getCellStyle))
+    override def getStyle = Option(Style(entity.getCellStyle))
 
     private def fromCell(c: org.apache.poi.ss.usermodel.Cell, valueType: Int): Any = valueType match {
       case CELL_TYPE_NUMERIC => c.getNumericCellValue
@@ -59,8 +59,8 @@ object Cell {
   }
 
   private class PlaceHolderCell(override val rowIdx: Int, override val columnIdx: Int, override val sheet: Sheet) extends Cell {
-    override def getValue = None
-    override def getStyle = None
+    override final val getValue = None
+    override final val getStyle = None
     override val row = sheet.rows(rowIdx)
     override def setValue(value: Any) = {
       //println(rowIdx+"|"+columnIdx+"|"+value)

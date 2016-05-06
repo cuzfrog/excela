@@ -9,6 +9,7 @@ sealed trait Sheet {
   val workbook: Workbook
   /**
    * Get all rows from this sheet. If a row is not defined in excel sheet, a placeholder row will substitute.
+   * Empty rows in the tail, though defined in excel sheet, will be dropped.
    */
   def rows: Seq[Row]
   def getRow(rowIdx: Int): Row
@@ -44,12 +45,18 @@ private object Sheet extends LazyLogging {
 
     override lazy val rows = {
       val indexedRows = {
-        val cc = entity.rowIterator().toSeq
+        val cc = entity.rowIterator().toSeq.map(Row(_, this)).filter(_.isEmpty.unary_!)
         cc.indices zip cc
       }
-      val bottomRowNum = indexedRows.last._2.getRowNum
+      val bottomRowNum = indexedRows.last._2.index
       val rowsMap = indexedRows.toMap
-      val rows = (0 to bottomRowNum).map(getRow)
+      val rows = (0 to bottomRowNum).map {
+        rowIdx =>
+          rowsMap.get(rowIdx) match {
+            case Some(row) => row
+            case None      => Row(rowIdx, this) //interpolate with placeholder
+          }
+      }
       rows
     }
     override def getRow(rowIdx: Int) = entity.getRow(rowIdx) match {
