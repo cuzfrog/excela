@@ -68,7 +68,7 @@ private object Sheet extends LazyLogging {
       var time1 = System.currentTimeMillis()
       val rightEndColumn = rows.map(_.maxColumnIdx).max
       var time2 = System.currentTimeMillis()
-      logger.info(s"Initiated lazy rows,row size:${rows.size}, and get maxColumnIdx:${rightEndColumn} Time consumed: ${(time2 - time1)}")
+      //logger.info(s"Initiated lazy rows,row size:${rows.size}, and get maxColumnIdx:${rightEndColumn} Time consumed: ${(time2 - time1)}")
 
       val cellsMatrix = rows.map {
         row =>
@@ -85,7 +85,7 @@ private object Sheet extends LazyLogging {
           }
       }
       time1 = System.currentTimeMillis()
-      logger.info(s"Initiated lazy rows,row size:${rows.size}, and get maxColumnIdx:${rightEndColumn} Time consumed: ${(time1 - time2)}")
+      //logger.info(s"Initiated cells matrix, Time consumed: ${(time1 - time2)}")
 
       cellsMatrix.map(_.toList).toList
     }
