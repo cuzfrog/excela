@@ -7,7 +7,13 @@ sealed trait Sheet {
   val name: String
   val index: Int
   val workbook: Workbook
-  def cells: List[List[Cell]]
+  /**
+   * Get all rows from this sheet. If a row is not defined in excel sheet, a placeholder row will substitute.
+   */
+  def rows: Seq[Row]
+  def getRow(rowIdx: Int): Row
+  def cells: Seq[Seq[Cell]]
+  def getCell(rowIdx: Int, columnIdx: Int): Cell
   def setValue(rowIdx: Int, columnIdx: Int, value: Any): Cell
   def setStyle(rowIdx: Int, columnIdx: Int, style: Style): Cell
   /**
@@ -35,46 +41,45 @@ private object Sheet extends LazyLogging {
     private val entity = sheet
     override val name = entity.getSheetName
     override val index = 0
-    override lazy val cells = {
-      //var time1 = System.currentTimeMillis()
-      val cellsCompact = {
-        val cc = entity.rowIterator().toList
+
+    override lazy val rows = {
+      val indexedRows = {
+        val cc = entity.rowIterator().toSeq
         cc.indices zip cc
       }
-      val bottomRowNum = cellsCompact.last._2.getRowNum
-      //var time2 = System.currentTimeMillis()
-      //logger.info("1 Time consumed:"+(time2-time1))
-      val rowSize = cellsCompact.size
-      val rightEndColumn = rowSize match {
-        case 0 => -1
-        case n =>
-          val maxSize = cellsCompact.map(_._2.size).max
-          cellsCompact.find(_._2.size == maxSize).map(_._2.last.getColumnIndex).get
-      }
-      //time1 = System.currentTimeMillis()
-      //logger.info("2 Time consumed:"+(time1-time2))
+      val bottomRowNum = indexedRows.last._2.getRowNum
+      val rowsMap = indexedRows.toMap
+      val rows = (0 to bottomRowNum).map(getRow)
+      rows
+    }
+    override def getRow(rowIdx: Int) = entity.getRow(rowIdx) match {
+      case null => Row(rowIdx, this)
+      case poir => Row(poir, this)
+    }
 
-      val cellsCompactMap=cellsCompact.toMap
-      val cellsMatrix = (0 to bottomRowNum).map {
-        rowIdx =>
-          val row = cellsCompactMap.get(rowIdx) match {
-            case Some(poir) => poir
-            case None       => this.entity.createRow(rowIdx)
-          }
+    override lazy val cells = {
+      var time1 = System.currentTimeMillis()
+      val rightEndColumn = rows.map(_.maxColumnIdx).max
+      var time2 = System.currentTimeMillis()
+      logger.info(s"Initiated lazy rows,row size:${rows.size}, and get maxColumnIdx:${rightEndColumn} Time consumed: ${(time2 - time1)}")
+
+      val cellsMatrix = rows.map {
+        row =>
           val cellsInRow = {
-            val cr = row.cellIterator.toList
-            cr.indices zip cr
+            val cr = row.cells
+            cr.map(_.columnIdx) zip cr
           }.toMap
           (0 to rightEndColumn).map {
             colIdx =>
               cellsInRow.get(colIdx) match {
-                case Some(poic) => Cell(poic, this) //create poi cell
-                case None       => Cell(rowIdx, colIdx, this) //when no column index, create placeholder.
+                case Some(cell) => cell //return Cell in row
+                case None       => Cell(row.index, colIdx, this) //when no column index, create placeholder.
               }
           }
       }
-      //time2 = System.currentTimeMillis()
-      //logger.info("3 Time consumed:" + (time2 - time1))
+      time1 = System.currentTimeMillis()
+      logger.info(s"Initiated lazy rows,row size:${rows.size}, and get maxColumnIdx:${rightEndColumn} Time consumed: ${(time1 - time2)}")
+
       cellsMatrix.map(_.toList).toList
     }
 
@@ -93,24 +98,14 @@ private object Sheet extends LazyLogging {
       range.copy(fromRange, content)
     }
 
-    def getRange(rowBegin: Int, rowEnd: Int, columnBegin: Int, columnEnd: Int): Range = {
+    override def getRange(rowBegin: Int, rowEnd: Int, columnBegin: Int, columnEnd: Int): Range = {
       Range(this, rowBegin: Int, rowEnd: Int, columnBegin: Int, columnEnd: Int)
     }
-    def getRange(preRange: Range.PreRange): Range = {
+    override def getRange(preRange: Range.PreRange): Range = {
       Range(this, preRange)
     }
 
-    private def getCell(rowIdx: Int, columnIdx: Int) = {
-      val row = entity.getRow(rowIdx) match {
-        case null => entity.createRow(rowIdx)
-        case r    => r
-      }
-      val cell = row.getCell(columnIdx) match {
-        case null => row.createCell(columnIdx)
-        case c    => c
-      } //above: get poi cell
-      Cell(cell, this)
-    }
+    override def getCell(rowIdx: Int, columnIdx: Int) = getRow(rowIdx).getCell(columnIdx)
 
     override def update(data: List[List[Any]]) = {
 

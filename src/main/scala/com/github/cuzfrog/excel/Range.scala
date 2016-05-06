@@ -1,7 +1,7 @@
 package com.github.cuzfrog.excel
 
 sealed trait Range {
-  val cells: List[List[Cell]]
+  val cells: Seq[Seq[Cell]]
   val rowBegin: Int
   val rowEnd: Int
   val columnBegin: Int
