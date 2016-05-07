@@ -22,7 +22,13 @@
 		<scala.tools.version>2.11</scala.tools.version>
 		<scala.version>2.11.7</scala.version>
 	</properties>
-
+	<distributionManagement>
+		<repository>
+			<id>bintray-cuzfrog-maven</id>
+			<name>cuzfrog-maven</name>
+			<url>https://api.bintray.com/maven/cuzfrog/maven/excela/;publish=1</url>
+		</repository>
+	</distributionManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
@@ -72,7 +78,7 @@
 		<dependency>
 			<groupId>com.github.cuzfrog</groupId>
 			<artifactId>utils</artifactId>
-			<version>0.0.1</version>
+			<version>0.0.2</version>
 		</dependency>
 	</dependencies>
 
