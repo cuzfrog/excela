@@ -2,7 +2,7 @@
 # Docker Hub https://registry.hub.docker.com/_/debian/
 # Read more about containers on our dev center
 # http://devcenter.wercker.com/docs/containers/index.html
-box: maven
+box: cuzfrog/maven-plus
 # You can also use services such as databases. Read more on our dev center:
 # http://devcenter.wercker.com/docs/services/index.html
 # services:
@@ -21,16 +21,24 @@ build:
     # http://devcenter.wercker.com/docs/steps/index.html
   steps:
     - script:
+        name: copy settings.xml
+        code: |
+          cp ./settings.xml ~/.m2/settings.xml
+          sed -i "s/BINTRAY_USER/$BINTRAY_USER/g" ~/.m2/settings.xml
+          sed -i "s/BINTRAY_PASS/$BINTRAY_PASS/g" ~/.m2/settings.xml
+    - script:
+        name: restore cache
+        code: |      
+          if test -d "$WERCKER_CACHE_DIR/.m2"; then rsync -avz "$WERCKER_CACHE_DIR/.m2" "$HOME/"; fi
+    - script:
         name: build
         code: |
           mvn install
     - script:
-        name: activate settings.xml
-        code: |
-          bash ./deploy.sh
-          sed -i "s/BINTRAY_USER/$BINTRAY_USER/g" ~/.m2/settings.xml
-          sed -i "s/BINTRAY_PASS/$BINTRAY_PASS/g" ~/.m2/settings.xml
-    - script:
         name: deploy
         code: |
-          mvn deploy
+          echo deploy
+    - script:
+        name: store cache
+        code: |      
+          if test -d "$HOME/.m2"; then rsync -avz  "$HOME/.m2" "$WERCKER_CACHE_DIR"; fi
