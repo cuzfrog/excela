@@ -12,6 +12,9 @@ sealed trait Sheet {
    * Empty rows in the tail, though defined in excel sheet, will be dropped.
    */
   def rows: Seq[Row]
+  /**
+   * Retrieve a row directly from poi sheet without caching.
+   */
   def getRow(rowIdx: Int): Row
   def cells: Seq[Seq[Cell]]
   def getCell(rowIdx: Int, columnIdx: Int): Cell
@@ -46,7 +49,7 @@ private object Sheet extends LazyLogging {
     override lazy val rows = {
       val indexedRows = {
         val cc = entity.rowIterator().toSeq.map(Row(_, this)).filter(_.isEmpty.unary_!)
-        cc.indices zip cc
+        cc.map(_.index) zip cc
       }
       val bottomRowNum = indexedRows.last._2.index
       val rowsMap = indexedRows.toMap
@@ -59,6 +62,7 @@ private object Sheet extends LazyLogging {
       }
       rows
     }
+    
     override def getRow(rowIdx: Int) = entity.getRow(rowIdx) match {
       case null => Row(rowIdx, this)
       case poir => Row(poir, this)
