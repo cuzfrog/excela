@@ -7,7 +7,7 @@ trait Cell {
   val rowIdx: Int
   val columnIdx: Int
   val row: Row
-  val sheet: Sheet = row.sheet
+  def sheet: Sheet
   def getValue: Option[Any]
   def getStyle: Option[Style]
   def setValue(value: Any): Cell
@@ -26,7 +26,7 @@ object Cell {
     private val entity = cell
     override val rowIdx = cell.getRowIndex
     override val columnIdx = cell.getColumnIndex
-
+    override val sheet: Sheet = row.sheet
     import org.apache.poi.ss.usermodel.Cell._
     override def getValue = Option(fromCell(cell, cell.getCellType))
     override def getStyle = Option(Style(entity.getCellStyle))
