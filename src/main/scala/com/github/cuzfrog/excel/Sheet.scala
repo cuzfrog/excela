@@ -34,6 +34,8 @@ sealed trait Sheet {
    * If input is Style, setStyle. Otherwise setValue.
    */
   def update(data: List[List[Any]]): Sheet
+
+  private[excel] def realCell(rowIdx: Int, columnIdx: Int): Cell
 }
 
 private object Sheet extends LazyLogging {
@@ -62,7 +64,7 @@ private object Sheet extends LazyLogging {
       }
       rows
     }
-    
+
     override def getRow(rowIdx: Int) = entity.getRow(rowIdx) match {
       case null => Row(rowIdx, this)
       case poir => Row(poir, this)
@@ -134,6 +136,19 @@ private object Sheet extends LazyLogging {
           }
       }
       this
+    }
+
+    override def realCell(rowIdx: Int, columnIdx: Int): Cell = {
+      val poiRow = this.entity.getRow(rowIdx) match {
+        case null => this.entity.createRow(rowIdx)
+        case r    => r
+      }
+      val poiCell = poiRow.getCell(columnIdx) match {
+        case null => poiRow.createCell(columnIdx)
+        case c    => c
+      }
+      val row = this.getRow(rowIdx)
+      Cell(poiCell, row)
     }
   }
 }

@@ -61,13 +61,12 @@ object Cell {
   private class PlaceHolderCell(override val rowIdx: Int, override val columnIdx: Int, override val sheet: Sheet) extends Cell {
     override final val getValue = None
     override final val getStyle = None
-    override val row = sheet.rows(rowIdx)
+    override val row = sheet.getRow(rowIdx)
     override def setValue(value: Any) = {
-      //println(rowIdx+"|"+columnIdx+"|"+value)
-      sheet.setValue(rowIdx, columnIdx, value) //return a PoiCell with value set
+      sheet.realCell(rowIdx, columnIdx).setValue(value) //return a PoiCell with value set
     }
     override def setStyle(style: Style) = {
-      sheet.setStyle(rowIdx, columnIdx, style)
+      sheet.realCell(rowIdx, columnIdx).setStyle(style)
     }
   }
 }
