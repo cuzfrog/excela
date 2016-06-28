@@ -19,6 +19,9 @@ sealed trait Workbook {
 }
 
 object Workbook {
+  /**
+   * @param renameSurfix if not specified, the excel file will not be saved as a new file.
+   */
   def apply(path: String, renameSurfix: String = ""): Workbook = {
     require(path.matches(""".*\.xlsx?"""), "Not excel file:" + path)
     val (p, fn, s) = FileAssistant.pathParse(path)
