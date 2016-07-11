@@ -37,7 +37,7 @@ build:
     - script:
         name: deploy
         code: |
-          echo deploy
+          mvn deploy
     - script:
         name: store cache
         code: |      
