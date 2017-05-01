@@ -1,7 +1,6 @@
 package com.github.cuzfrog.excel
 
-import org.apache.poi.ss.usermodel.CellStyle
-import org.apache.poi.ss.usermodel.IndexedColors
+import org.apache.poi.ss.usermodel.CellType
 
 trait Cell {
   val rowIdx: Int
@@ -27,18 +26,17 @@ object Cell {
     override val rowIdx = cell.getRowIndex
     override val columnIdx = cell.getColumnIndex
     override val sheet: Sheet = row.sheet
-    import org.apache.poi.ss.usermodel.Cell._
-    override def getValue = Option(fromCell(cell, cell.getCellType))
+    override def getValue = Option(fromCell(cell, cell.getCellTypeEnum))
     override def getStyle = Option(Style(entity.getCellStyle))
 
-    private def fromCell(c: org.apache.poi.ss.usermodel.Cell, valueType: Int): Any = valueType match {
-      case CELL_TYPE_NUMERIC => c.getNumericCellValue
-      case CELL_TYPE_BOOLEAN => c.getBooleanCellValue
-      case CELL_TYPE_FORMULA => fromCell(c, c.getCachedFormulaResultType) //recursive call
+    private def fromCell(c: org.apache.poi.ss.usermodel.Cell, valueType: CellType): Any = valueType match {
+      case CellType.NUMERIC => c.getNumericCellValue
+      case CellType.BOOLEAN => c.getBooleanCellValue
+      case CellType.FORMULA => fromCell(c, c.getCachedFormulaResultTypeEnum) //recursive call
       case _                 => c.getStringCellValue
     }
 
-    override def setValue(value: Any) = {
+    override def setValue(value: Any): PoiCell = {
       value match {
         case null       => //do nothing
         case v: Boolean => cell.setCellValue(v)
@@ -50,7 +48,7 @@ object Cell {
       this
     }
 
-    override def setStyle(style: Style) = {
+    override def setStyle(style: Style): PoiCell = {
 
       this.entity.setCellStyle(style.entity)
       this
@@ -62,10 +60,10 @@ object Cell {
     override final val getValue = None
     override final val getStyle = None
     override val row = sheet.getRow(rowIdx)
-    override def setValue(value: Any) = {
+    override def setValue(value: Any): Cell = {
       sheet.realCell(rowIdx, columnIdx).setValue(value) //return a PoiCell with value set
     }
-    override def setStyle(style: Style) = {
+    override def setStyle(style: Style): Cell = {
       sheet.realCell(rowIdx, columnIdx).setStyle(style)
     }
   }

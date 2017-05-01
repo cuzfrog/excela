@@ -1,6 +1,6 @@
 package com.github.cuzfrog.excel
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import com.typesafe.scalalogging.LazyLogging
 
 sealed trait Sheet {
@@ -27,7 +27,7 @@ sealed trait Sheet {
    *
    * @return the range to which contents are copied.
    */
-  def setRange(fromRange: Range, rowBegin: Int = (-1), columnBegin: Int = (-1), content: Byte = 0x01): Range
+  def setRange(fromRange: Range, rowBegin: Int = -1, columnBegin: Int = -1, content: Byte = 0x01): Range
   def getRange(rowBegin: Int, rowEnd: Int, columnBegin: Int, columnEnd: Int): Range
   def getRange(preRange: Range.PreRange): Range
   /**
@@ -50,7 +50,7 @@ private object Sheet extends LazyLogging {
 
     override lazy val rows = {
       val indexedRows = {
-        val cc = entity.rowIterator().toSeq.map(Row(_, this)).filter(_.isEmpty.unary_!)
+        val cc = entity.rowIterator().asScala.toSeq.map(Row(_, this)).filter(_.isEmpty.unary_!)
         cc.map(_.index) zip cc
       }
       val bottomRowNum = indexedRows.last._2.index
@@ -65,15 +65,15 @@ private object Sheet extends LazyLogging {
       rows
     }
 
-    override def getRow(rowIdx: Int) = entity.getRow(rowIdx) match {
+    override def getRow(rowIdx: Int): Row = entity.getRow(rowIdx) match {
       case null => Row(rowIdx, this)
       case poir => Row(poir, this)
     }
 
     override lazy val cells = {
-      var time1 = System.currentTimeMillis()
+      //var time1 = System.currentTimeMillis()
       val rightEndColumn = rows.map(_.maxColumnIdx).max
-      var time2 = System.currentTimeMillis()
+      //var time2 = System.currentTimeMillis()
       //logger.info(s"Initiated lazy rows,row size:${rows.size}, and get maxColumnIdx:${rightEndColumn} Time consumed: ${(time2 - time1)}")
 
       val cellsMatrix = rows.map {
@@ -90,16 +90,16 @@ private object Sheet extends LazyLogging {
               }
           }
       }
-      time1 = System.currentTimeMillis()
+      //time1 = System.currentTimeMillis()
       //logger.info(s"Initiated cells matrix, Time consumed: ${(time1 - time2)}")
 
       cellsMatrix.map(_.toList).toList
     }
 
-    override def setValue(rowIdx: Int, columnIdx: Int, value: Any) = {
+    override def setValue(rowIdx: Int, columnIdx: Int, value: Any): Cell = {
       this.getCell(rowIdx: Int, columnIdx: Int).setValue(value)
     }
-    override def setStyle(rowIdx: Int, columnIdx: Int, style: Style) = {
+    override def setStyle(rowIdx: Int, columnIdx: Int, style: Style): Cell = {
       this.getCell(rowIdx: Int, columnIdx: Int).setStyle(style)
     }
     override def setRange(fromRange: Range, rowBegin: Int, columnBegin: Int, content: Byte): Range = {
@@ -118,9 +118,9 @@ private object Sheet extends LazyLogging {
       Range(this, preRange)
     }
 
-    override def getCell(rowIdx: Int, columnIdx: Int) = getRow(rowIdx).getCell(columnIdx)
+    override def getCell(rowIdx: Int, columnIdx: Int): Cell = getRow(rowIdx).getCell(columnIdx)
 
-    override def update(data: List[List[Any]]) = {
+    override def update(data: List[List[Any]]): PoiSheet = {
 
       (data.indices zip data).foreach {
         row =>

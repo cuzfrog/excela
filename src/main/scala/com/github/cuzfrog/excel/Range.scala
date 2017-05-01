@@ -22,7 +22,7 @@ object Range {
     new RangeImpl(sheet: Sheet, rowBegin: Int, rowEnd: Int, columnBegin: Int, columnEnd: Int)
   }
 
-  case class PreRange(val rowBegin: Int, val rowEnd: Int, val columnBegin: Int, val columnEnd: Int)
+  case class PreRange(rowBegin: Int, rowEnd: Int, columnBegin: Int, columnEnd: Int)
 
   private[excel] def apply(sheet: Sheet, preRange: PreRange): Range = {
     new RangeImpl(sheet, preRange.rowBegin, preRange.rowEnd, preRange.columnBegin, preRange.columnEnd)
@@ -30,21 +30,21 @@ object Range {
 
   private class RangeImpl(val sheet: Sheet, val rowBegin: Int, val rowEnd: Int, val columnBegin: Int, val columnEnd: Int) extends Range {
     require(rowBegin >= 0 && rowEnd >= rowBegin && columnBegin >= 0 && columnEnd >= columnBegin,
-      s"Illegal index:${rowBegin},${rowEnd},${columnBegin},${columnEnd}")
+      s"Illegal index:$rowBegin,$rowEnd,$columnBegin,$columnEnd")
     private[this] val sheetCells = sheet.cells
-    require(rowEnd <= sheetCells.size && columnEnd <= sheetCells.head.size, s"Out of sheet bound:row${rowEnd},${columnEnd}")
+    require(rowEnd <= sheetCells.size && columnEnd <= sheetCells.head.size, s"Out of sheet bound:row$rowEnd,$columnEnd")
     val cells = sheet.cells.slice(rowBegin, rowEnd + 1).map(_.slice(columnBegin, columnEnd + 1))
 
-    def copy(fromRange: Range, content: Byte) = {
+    def copy(fromRange: Range, content: Byte): Range = {
       val fromRowCnt = fromRange.rowEnd - fromRange.rowBegin + 1
       val fromColumnCnt = fromRange.columnEnd - fromRange.columnBegin + 1
       val minRowCnt = Math.min(cells.size, fromRowCnt)
       val minColCnt = Math.min(columnEnd - columnBegin + 1, fromColumnCnt)
-      (0 to minRowCnt - 1).foreach {
+      (0 until minRowCnt).foreach {
         rowIdx =>
           val row = cells(rowIdx)
           val fromRow = fromRange.cells(rowIdx)
-          (0 to minColCnt - 1).foreach {
+          (0 until minColCnt).foreach {
             colIdx =>
               val cell = row(colIdx)
               val fromCell = fromRow(colIdx)

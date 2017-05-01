@@ -1,19 +1,17 @@
 package com.github.cuzfrog.excel
 
-import java.io.File
-import scala.collection.JavaConversions._
-import org.apache.poi.ss.usermodel.WorkbookFactory
-import java.io.FileOutputStream
-import java.io.FileInputStream
-import org.apache.poi.ss.usermodel.CellStyle
-import org.apache.poi.ss.usermodel.IndexedColors
+import java.io.{FileInputStream, FileOutputStream}
+
 import com.github.cuzfrog.utils.FileAssistant
+import org.apache.poi.ss.usermodel.WorkbookFactory
+
+import scala.collection.JavaConverters._
 
 sealed trait Workbook {
   private[excel] val entity: org.apache.poi.ss.usermodel.Workbook
-  val sheets: List[Sheet]
+  val sheets: Seq[Sheet]
   val path: String
-  def close: Unit
+  def close(): Unit
   def save: Workbook
   def saveAs(path: String): Workbook
 }
@@ -29,7 +27,7 @@ object Workbook {
     val poiWb = new PoiWorkbook(path)
     renameSurfix match {
       case "" => poiWb
-      case s => poiWb.saveAs(toPath)
+      case _ => poiWb.saveAs(toPath)
     }
   }
 
@@ -37,13 +35,13 @@ object Workbook {
     val entity = {
       val fileis = new FileInputStream(path)
       val workbook = WorkbookFactory.create(fileis)
-      fileis.close
+      fileis.close()
       workbook
     }
-    lazy val evaluator = entity.getCreationHelper().createFormulaEvaluator()
-    override val sheets = entity.iterator.toList.map(Sheet(_, this))
-    override def close = entity.close()
-    override def save = {
+    lazy val evaluator = entity.getCreationHelper.createFormulaEvaluator()
+    override val sheets = entity.iterator.asScala.toSeq.map(Sheet(_, this))
+    override def close(): Unit = entity.close()
+    override def save: PoiWorkbook = {
       val outS = new FileOutputStream(path)
       evaluator.setIgnoreMissingWorkbooks(true)
       evaluator.evaluateAll()
@@ -51,11 +49,11 @@ object Workbook {
       this
     }
 
-    override def saveAs(path: String) = {
+    override def saveAs(path: String): Workbook = {
       val outS = new FileOutputStream(path)
       entity.write(outS)
-      outS.close //close output stream
-      this.close //close old book
+      outS.close() //close output stream
+      this.close() //close old book
       Workbook(path) //open new book
     }
   }

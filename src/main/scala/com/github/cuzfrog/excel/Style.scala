@@ -1,7 +1,6 @@
 package com.github.cuzfrog.excel
 
-import org.apache.poi.ss.usermodel.CellStyle
-import org.apache.poi.ss.usermodel.IndexedColors
+import org.apache.poi.ss.usermodel.{BorderStyle, CellStyle, FillPatternType, IndexedColors}
 
 sealed trait Style {
   private[excel] val entity: CellStyle
@@ -33,16 +32,16 @@ class StyleBuilder(val workbook: Workbook) {
     val cellStyle = workbook.entity.createCellStyle()
     val dataFormat = workbook.entity.createDataFormat()
     def setBorderStyle(on: Boolean) = {
-      val bs = if (on) CellStyle.BORDER_THIN else CellStyle.BORDER_NONE
-      val bc = IndexedColors.BLACK.getIndex()
-      cellStyle.setBorderBottom(bs);
-      cellStyle.setBottomBorderColor(bc);
-      cellStyle.setBorderLeft(bs);
-      cellStyle.setLeftBorderColor(bc);
-      cellStyle.setBorderRight(bs);
-      cellStyle.setRightBorderColor(bc);
-      cellStyle.setBorderTop(bs);
-      cellStyle.setTopBorderColor(bc);
+      val bs = if (on) BorderStyle.THIN else BorderStyle.NONE
+      val bc = IndexedColors.BLACK.getIndex
+      cellStyle.setBorderBottom(bs)
+      cellStyle.setBottomBorderColor(bc)
+      cellStyle.setBorderLeft(bs)
+      cellStyle.setLeftBorderColor(bc)
+      cellStyle.setBorderRight(bs)
+      cellStyle.setRightBorderColor(bc)
+      cellStyle.setBorderTop(bs)
+      cellStyle.setTopBorderColor(bc)
     }
 
     val font = workbook.entity.createFont
@@ -53,8 +52,8 @@ class StyleBuilder(val workbook: Workbook) {
     setBorderStyle(hasBorder)
     cellStyle.setWrapText(wrapText)
     cellStyle.setFillForegroundColor(fgColor)
-    val fillStyle = if (isFill) CellStyle.SOLID_FOREGROUND else CellStyle.NO_FILL
-    cellStyle.setFillPattern(fillStyle);
+    val fillStyle = if (isFill) FillPatternType.SOLID_FOREGROUND else FillPatternType.NO_FILL
+    cellStyle.setFillPattern(fillStyle)
     cellStyle.setDataFormat(dataFormat.getFormat(this.dataFormatString))
     Style(cellStyle)
 

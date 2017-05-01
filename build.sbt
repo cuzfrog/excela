@@ -14,12 +14,12 @@ lazy val root = (project in file("."))
     reColors := Seq("magenta")
   )
 
-lazy val utils = (project in file("./utils"))
-  .settings(commonSettings)
-  .settings(
-    name := "utils",
-    version := "0.0.3dev2",
-    libraryDependencies ++= Seq(
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value % "compile"
-    )
-  )
+//lazy val utils = (project in file("./utils"))
+//  .settings(commonSettings)
+//  .settings(
+//    name := "utils",
+//    version := "0.0.3dev2",
+//    libraryDependencies ++= Seq(
+//      "org.scala-lang" % "scala-reflect" % scalaVersion.value % "compile"
+//    )
+//  )
