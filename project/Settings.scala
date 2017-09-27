@@ -20,8 +20,8 @@ object Settings {
       "spray repo" at "http://repo.spray.io"
     ),
     organization := "com.github.cuzfrog",
-    scalaVersion := "2.12.2",
-    crossScalaVersions := Seq("2.11.11", "2.12.2"),
+    scalaVersion := "2.12.3",
+    crossScalaVersions := Seq("2.11.11", "2.12.3"),
     scalacOptions ++= Seq(
       "-Xlint",
       "-unchecked",

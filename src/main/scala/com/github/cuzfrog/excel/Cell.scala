@@ -33,7 +33,8 @@ object Cell {
       case CellType.NUMERIC => c.getNumericCellValue
       case CellType.BOOLEAN => c.getBooleanCellValue
       case CellType.FORMULA => fromCell(c, c.getCachedFormulaResultTypeEnum) //recursive call
-      case _                 => c.getStringCellValue
+      case CellType.ERROR   => c.getErrorCellValue
+      case _                => c.getStringCellValue
     }
 
     override def setValue(value: Any): PoiCell = {
