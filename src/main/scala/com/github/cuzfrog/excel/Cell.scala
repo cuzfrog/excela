@@ -1,5 +1,8 @@
 package com.github.cuzfrog.excel
 
+import java.time.LocalDate
+import java.util.Date
+
 import org.apache.poi.ss.usermodel.CellType
 
 trait Cell {
@@ -39,11 +42,13 @@ object Cell {
 
     override def setValue(value: Any): PoiCell = {
       value match {
-        case null       => //do nothing
-        case v: Boolean => cell.setCellValue(v)
-        case v: Double  => cell.setCellValue(v)
-        case v: Int     => cell.setCellValue(v)
-        case v          => cell.setCellValue(v.toString)
+        case null         => //do nothing
+        case v: Boolean   => cell.setCellValue(v)
+        case v: Double    => cell.setCellValue(v)
+        case v: Int       => cell.setCellValue(v)
+        case v: Date      => cell.setCellValue(v)
+        case v: LocalDate => cell.setCellValue(java.sql.Date.valueOf(v))
+        case v            => cell.setCellValue(v.toString)
       }
       //println(value+"|"+this.getValue+"|"+entity.getRowIndex+","+entity.getColumnIndex+"|")
       this

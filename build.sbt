@@ -6,7 +6,7 @@ lazy val root = (project in file("."))
   .settings(commonSettings, publicationSettings, readmeVersionSettings)
   .settings(
     name := "excela",
-    version := "0.1.1",
+    version := "0.1.2",
     libraryDependencies ++= Seq(
       "org.apache.poi" % "poi" % "3.16",
       "org.apache.poi" % "poi-ooxml" % "3.16"
